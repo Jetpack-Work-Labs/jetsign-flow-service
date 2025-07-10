@@ -3,7 +3,7 @@ import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 import https from "https";
-import { SIGN_SERVER_URL, WORKER_NAME } from "../../const";
+import { SIGN_SERVER_URL } from "../../const";
 
 const metadata: Record<string, string> = {
   // REASON: "Document Approval",
