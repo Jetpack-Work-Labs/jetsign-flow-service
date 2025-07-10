@@ -11,7 +11,6 @@ import { createCertificate } from "../certificate";
 import { ApplicationService } from "../application";
 import { CertificateService } from "../certificate";
 import { CRYPTO_TOKEN, PDF_SIGNER } from "../../const";
-import { signPDF } from "../signserver/sign";
 
 export const HandleQueue = async (job: SignJob): Promise<void> => {
   const applicationService = new ApplicationService();
@@ -80,15 +79,5 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
       workerId: account_id + 1,
       tokenId: account_id + 0,
     });
-
-    await signPDF({
-      INPUT_PDF:
-        "/Users/clyde/Documents/office/jetpack_lab/getsign/getsign-flow_service/sample.pdf",
-      OUTPUT_PDF:
-        "/Users/clyde/Documents/office/jetpack_lab/getsign/getsign-flow_service/out.pdf",
-      WORKER_NAME: account_id + 1,
-    });
   }
-
-  // await DeleteTempFiles();
 };
