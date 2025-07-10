@@ -1,0 +1,10 @@
+.env
+node_modules
+signserver-db
+ejbca-db
+package-lock.json
+yarn.lock
+src/tmp/
+src/certificates/
+sample.pdf
+out.pdf
