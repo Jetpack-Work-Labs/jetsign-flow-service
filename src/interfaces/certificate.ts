@@ -8,11 +8,11 @@ export interface CertificateDto {
 }
 
 export interface Icertificate {
-  file_url: string;
-  file_name: string;
+  fileUrl: string;
+  fileName: string;
   password: string;
-  account_id: number | string;
-  docker_file_path: string;
+  accountId: number | string;
+  dockerFilePath: string;
   workerId?: string;
   tokenId?: string;
 }

@@ -35,10 +35,10 @@ export async function pollAndProcessJobs(
             })
           );
           console.log(
-            `✅ Processed and deleted job for document ${job.account_id}`
+            `✅ Processed and deleted job for document ${job.accountId}`
           );
         } catch (err) {
-          console.error(`❌ Failed to process job ${job.account_id}`, err);
+          console.error(`❌ Failed to process job ${job.accountId}`, err);
         }
       }
     } catch (err) {

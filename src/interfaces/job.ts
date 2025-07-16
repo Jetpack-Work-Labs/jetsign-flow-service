@@ -1,4 +1,4 @@
 export interface SignJob {
-  account_id: string;
+  accountId: string;
   type?: string;
 }

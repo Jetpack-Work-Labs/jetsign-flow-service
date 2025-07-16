@@ -3,16 +3,16 @@ import { Icertificate } from "../interfaces";
 
 const schema = new Schema<Icertificate>(
   {
-    account_id: {
+    accountId: {
       type: Number,
       required: true,
       index: true,
     },
-    file_url: {
+    fileUrl: {
       type: String,
       required: true,
     },
-    file_name: {
+    fileName: {
       type: String,
       required: true,
     },
@@ -20,7 +20,7 @@ const schema = new Schema<Icertificate>(
       type: String,
       required: true,
     },
-    docker_file_path: {
+    dockerFilePath: {
       type: String,
       required: true,
     },

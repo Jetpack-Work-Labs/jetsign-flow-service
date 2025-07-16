@@ -23,8 +23,8 @@ export const uploadFile = async ({
   try {
     await s3.send(new PutObjectCommand(uploadParams));
     return {
-      file_url: Key,
-      file_name: Key.split("/").reverse()[0],
+      fileUrl: Key,
+      fileName: Key.split("/").reverse()[0],
       localFileUrl: filePath,
     };
   } catch (error) {

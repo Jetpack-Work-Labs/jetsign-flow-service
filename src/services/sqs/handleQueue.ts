@@ -15,16 +15,16 @@ import { CRYPTO_TOKEN, PDF_SIGNER } from "../../const";
 export const HandleQueue = async (job: SignJob): Promise<void> => {
   const applicationService = new ApplicationService();
   const certificateService = new CertificateService();
-  const { account_id } = job;
-  const company = await applicationService.findCompany(account_id);
+  const { accountId } = job;
+  const company = await applicationService.findCompany(accountId);
   if (company) {
     let docker_certificate_path;
     let docker_certificate_password;
-    let certificate = await certificateService.findByCompanyId(account_id);
+    let certificate = await certificateService.findByCompanyId(accountId);
     if (!certificate) {
       const { user_email, user_name, account_slug } = company || {};
       const { certificatePath, password } = await createCertificate({
-        serialNumber: `${account_id}`,
+        serialNumber: `${accountId}`,
         commonName: `${user_name} (${user_email})`,
         countryName: "",
         state: "",
@@ -32,35 +32,35 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
         organizationName: account_slug || "",
       });
       docker_certificate_password = password;
-      const { file_url, file_name } = await uploadFile({
+      const { fileUrl, fileName } = await uploadFile({
         filePath: certificatePath,
         type: "p12",
       });
       docker_certificate_path = await createP12Docker(certificatePath);
       const certificatePayload: Icertificate = {
-        account_id,
-        file_url,
-        file_name,
+        accountId,
+        fileUrl,
+        fileName,
         password,
-        docker_file_path: docker_certificate_path,
+        dockerFilePath: docker_certificate_path,
       };
       certificate = await certificateService.createCertificate(
         certificatePayload
       );
     } else {
       docker_certificate_password = certificate.password;
-      docker_certificate_path = certificate.docker_file_path;
+      docker_certificate_path = certificate.dockerFilePath;
     }
     const { exists: crypto_token_exist } = await checkWorkerExists({
-      worker: CRYPTO_TOKEN(account_id),
+      worker: CRYPTO_TOKEN(accountId),
     });
     const { exists: pdf_signer_exist } = await checkWorkerExists({
-      worker: PDF_SIGNER(account_id),
+      worker: PDF_SIGNER(accountId),
     });
     if (!crypto_token_exist) {
       await CreateCryptoToken({
-        workerId: account_id + 0,
-        token_name: account_id + 0,
+        workerId: accountId + 0,
+        token_name: accountId + 0,
         KEYSTOREPATH: docker_certificate_path,
         KEYSTOREPASSWORD: docker_certificate_password,
         DEFAULTKEY: "signer00003",
@@ -68,16 +68,16 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
     }
     if (!pdf_signer_exist) {
       await createPdfWOrker({
-        workerId: account_id + 1,
-        token_name: account_id + 0,
+        workerId: accountId + 1,
+        token_name: accountId + 0,
         DEFAULTKEY: "signer00003",
       });
     }
 
     await certificateService.updateCertificates({
-      account_id,
-      workerId: account_id + 1,
-      tokenId: account_id + 0,
+      accountId,
+      workerId: accountId + 1,
+      tokenId: accountId + 0,
     });
   }
 };

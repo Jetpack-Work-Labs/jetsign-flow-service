@@ -23,7 +23,7 @@ export class CertificateService {
   }
   async updateCertificates(payload: Partial<Icertificate>): Promise<any> {
     return await this.model.updateOne(
-      { account_id: payload.account_id },
+      { account_id: payload.accountId },
       {
         $set: { workerId: payload.workerId, tokenId: payload.tokenId },
       }
