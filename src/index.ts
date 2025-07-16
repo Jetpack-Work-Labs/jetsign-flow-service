@@ -10,3 +10,17 @@ import { connectDB } from "./infrastructure";
     console.log(error);
   }
 })();
+
+// (async () => {
+//   try {
+//     await signPDF({
+//       INPUT_PDF:
+//         "/Users/clyde/Documents/office/jetpack_lab/getsign/getsign-flow_service/sample.pdf",
+//       OUTPUT_PDF:
+//         "/Users/clyde/Documents/office/jetpack_lab/getsign/getsign-flow_service/signed.pdf",
+//       WORKER_NAME: "6282336",
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// })();

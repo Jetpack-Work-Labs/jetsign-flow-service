@@ -8,3 +8,4 @@ src/tmp/
 src/certificates/
 sample.pdf
 out.pdf
+dist/

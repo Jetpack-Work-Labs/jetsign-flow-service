@@ -25,7 +25,7 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
       const { user_email, user_name, account_slug } = company || {};
       const { certificatePath, password } = await createCertificate({
         serialNumber: `${account_id}`,
-        commonName: `t${user_name} (${user_email})`,
+        commonName: `${user_name} (${user_email})`,
         countryName: "",
         state: "",
         localityName: "",
