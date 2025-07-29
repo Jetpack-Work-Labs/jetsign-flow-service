@@ -1,61 +1,47 @@
 import axios from "axios";
 import FormData from "form-data";
-import fs from "fs";
-import path from "path";
 import https from "https";
+import { Readable } from "stream";
 import { SIGN_SERVER_URL } from "../../const";
+import { addWatermarkToPdf } from "../../utils/watermark";
 
-const metadata: Record<string, string> = {
-  // REASON: "Document Approval",
-  // LOCATION: "ktm nepal",
-  // CONTACTINFO: "pradip@jetpacklab.com",
-  // SIGNERNAME: "Pradip Kharal",
-};
-
-export async function signPDF({
-  INPUT_PDF,
-  OUTPUT_PDF,
+export async function signPDFStream({
+  inputStream,
+  outputStream,
   WORKER_NAME,
+  filename = "document.pdf",
 }: {
-  INPUT_PDF: string;
-  OUTPUT_PDF: string;
+  inputStream: Readable;
+  outputStream: NodeJS.WritableStream;
   WORKER_NAME: string;
+  filename?: string;
 }): Promise<void> {
   try {
-    const fileStream = fs.createReadStream(INPUT_PDF);
     const form = new FormData();
 
     form.append("workerName", WORKER_NAME);
-    form.append("datafile", fileStream, {
-      filename: path.basename(INPUT_PDF),
+    form.append("datafile", inputStream, {
+      filename,
       contentType: "application/pdf",
     });
 
-    const metadataString = Object.entries(metadata)
-      .map(([key, value]) => `${key}=${value}`)
-      .join(";");
-
-    if (metadataString) {
-      form.append("REQUEST_METADATA", metadataString);
-    }
-
-    const response = await axios.post<ArrayBuffer>(SIGN_SERVER_URL, form, {
+    // Stream the response directly to the output stream
+    const response = await axios.post(SIGN_SERVER_URL, form, {
       headers: {
         ...form.getHeaders(),
       },
-      responseType: "arraybuffer",
+      responseType: "stream",
       httpsAgent: new https.Agent({
         rejectUnauthorized: false, // Only for testing, enable in production
       }),
     });
-
-    await fs.writeFileSync(OUTPUT_PDF, Buffer.from(response.data));
-    console.log("✅ Signed PDF saved to:", OUTPUT_PDF);
+    response.data.pipe(outputStream);
   } catch (err) {
     if (err instanceof Error) {
-      console.error("❌ Error signing PDF:", err.message);
+      console.error("❌ Error signing PDF stream:", err.message);
     } else {
-      console.error("❌ Unknown error signing PDF");
+      console.error("❌ Unknown error signing PDF stream");
     }
+    throw err;
   }
 }
