@@ -79,7 +79,7 @@ export async function createPdfWOrker({
     `docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver removeworker ${workerId}"`
   );
   const dockerCommand = `
-  docker exec signserver sh -c "
+docker exec signserver sh -c "
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} TYPE "PROCESSABLE" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} IMPLEMENTATION_CLASS "org.signserver.module.pdfsigner.PDFSigner" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} NAME "${workerId}" && \
@@ -89,11 +89,7 @@ export async function createPdfWOrker({
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} LOCATION "Nepal" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} DIGESTALGORITHM "SHA256" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} WORKERCLASS "org.signserver.module.pdfsigner.PDFSigner" && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} ADD_VISIBLE_SIGNATURE true && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} VISIBLE_SIGNATURE_CUSTOM_IMAGE_PATH '/opt/keyfactor/signserver/watermark.png' && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} WATERMARK_POSITION CENTER && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} WATERMARK_OPACITY 0.5 && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} WATERMARK_SCALE 1.0 && \
+/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} ADD_VISIBLE_SIGNATURE false && \
 /opt/keyfactor/signserver/bin/signserver reload ${workerId}"
   
   `.trim();
