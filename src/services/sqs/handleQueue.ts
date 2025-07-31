@@ -52,10 +52,10 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
       docker_certificate_path = certificate.dockerFilePath;
     }
     const { exists: crypto_token_exist } = await checkWorkerExists({
-      worker: CRYPTO_TOKEN(accountId),
+      worker: accountId + 0,
     });
     const { exists: pdf_signer_exist } = await checkWorkerExists({
-      worker: PDF_SIGNER(accountId),
+      worker: accountId + 1,
     });
     console.log({ crypto_token_exist, pdf_signer_exist });
     if (!crypto_token_exist) {
