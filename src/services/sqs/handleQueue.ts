@@ -60,7 +60,7 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
     console.log({ crypto_token_exist, pdf_signer_exist });
 
     // Always use existing workers instead of creating new ones
-    if (!certificate && !crypto_token_exist) {
+    if (!crypto_token_exist) {
       await CreateCryptoToken({
         workerId: String(accountId) + "0",
         token_name: String(accountId) + "0",
@@ -69,7 +69,7 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
         DEFAULTKEY: "signer00003",
       });
     }
-    if (!certificate && !pdf_signer_exist) {
+    if (!pdf_signer_exist) {
       await createPdfWOrker({
         workerId: String(accountId) + "1",
         token_name: String(accountId) + "0",
