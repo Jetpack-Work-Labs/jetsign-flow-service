@@ -3,7 +3,6 @@ import FormData from "form-data";
 import https from "https";
 import { Readable } from "stream";
 import { SIGN_SERVER_URL } from "../../const";
-import { addWatermarkToPdf } from "../../utils/watermark";
 
 export async function signPDFStream({
   inputStream,
