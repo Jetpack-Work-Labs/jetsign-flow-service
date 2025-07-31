@@ -57,6 +57,7 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
     const { exists: pdf_signer_exist } = await checkWorkerExists({
       worker: PDF_SIGNER(accountId),
     });
+    console.log({ crypto_token_exist, pdf_signer_exist });
     if (!crypto_token_exist) {
       await CreateCryptoToken({
         workerId: accountId + 0,
