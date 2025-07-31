@@ -27,7 +27,10 @@ export async function addWatermarkToPdf(pdfBuffer: Buffer): Promise<Buffer> {
     try {
       const watermarkImageBytes = fs.readFileSync(watermarkImagePath);
       const watermarkImage = await pdfDoc.embedPng(watermarkImageBytes);
-
+      console.log({
+        watermarkImageBytes,
+        watermarkImage,
+      });
       lastPage.drawImage(watermarkImage, {
         x,
         y,
