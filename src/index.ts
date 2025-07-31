@@ -73,10 +73,11 @@ app.post("/signserver/process", async (req, res) => {
         } else {
           throw new Error("No file data found");
         }
-
+        console.log(shouldAddWatermark);
         if (shouldAddWatermark) {
           try {
             processedPdfBuffer = await addWatermarkToPdf(processedPdfBuffer);
+            console.log("watermark added ");
           } catch (watermarkError) {
             if ((filePart as any).buffer) {
               processedPdfBuffer = (filePart as any).buffer;

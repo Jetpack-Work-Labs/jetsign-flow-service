@@ -21,7 +21,7 @@ export async function addWatermarkToPdf(pdfBuffer: Buffer): Promise<Buffer> {
     __dirname,
     "../public/watermark/watermark.png"
   );
-
+  console.log(watermarkImagePath);
   // Add watermark image if provided
   if (watermarkImagePath && fs.existsSync(watermarkImagePath)) {
     try {
