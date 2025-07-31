@@ -52,33 +52,35 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
       docker_certificate_path = certificate.dockerFilePath;
     }
     const { exists: crypto_token_exist } = await checkWorkerExists({
-      worker: accountId + 0,
+      worker: String(accountId) + "0",
     });
     const { exists: pdf_signer_exist } = await checkWorkerExists({
-      worker: accountId + 1,
+      worker: String(accountId) + "1",
     });
     console.log({ crypto_token_exist, pdf_signer_exist });
-    if (!crypto_token_exist) {
+
+    // Always use existing workers instead of creating new ones
+    if (!certificate && !crypto_token_exist) {
       await CreateCryptoToken({
-        workerId: accountId + 0,
-        token_name: accountId + 0,
+        workerId: String(accountId) + "0",
+        token_name: String(accountId) + "0",
         KEYSTOREPATH: docker_certificate_path,
         KEYSTOREPASSWORD: docker_certificate_password,
         DEFAULTKEY: "signer00003",
       });
     }
-    if (!pdf_signer_exist) {
+    if (!certificate && !pdf_signer_exist) {
       await createPdfWOrker({
-        workerId: accountId + 1,
-        token_name: accountId + 0,
+        workerId: String(accountId) + "1",
+        token_name: String(accountId) + "0",
         DEFAULTKEY: "signer00003",
       });
     }
 
     await certificateService.updateCertificates({
       accountId,
-      workerId: accountId + 1,
-      tokenId: accountId + 0,
+      workerId: String(accountId) + "1",
+      tokenId: String(accountId) + "0",
     });
   }
 };
