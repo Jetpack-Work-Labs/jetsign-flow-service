@@ -9,7 +9,10 @@ export async function checkWorkerExists({ worker }: { worker: string }) {
     docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver getstatus brief ${worker}"
   `.trim();
   try {
-    await runDockerCommand(dockerCommand);
+    const res = await runDockerCommand(dockerCommand);
+    if (res.includes("Errors")) {
+      return { exists: false };
+    }
     return { exists: true };
   } catch (error) {
     return { exists: false };
@@ -20,7 +23,10 @@ export async function activateAll() {
     docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver reload all"
   `.trim();
   try {
-    await runDockerCommand(dockerCommand);
+    const res = await runDockerCommand(dockerCommand);
+    if (res.includes("Errors")) {
+      return { exists: false };
+    }
     return { exists: true };
   } catch (error) {
     return { exists: false };
