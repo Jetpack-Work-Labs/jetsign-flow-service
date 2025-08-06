@@ -10,9 +10,9 @@ export class CertificateService {
   }
 
   async findByCompanyId(
-    account_id: number | string
+    accountId: number | string
   ): Promise<Icertificate | null> {
-    const certificate = await this.model.findOne({ account_id }).exec();
+    const certificate = await this.model.findOne({ accountId }).exec();
     if (!certificate) {
       return null;
     }
