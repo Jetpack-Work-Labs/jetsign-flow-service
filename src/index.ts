@@ -5,6 +5,7 @@ import { connectDB } from "./infrastructure";
 import { signPDFStream } from "./services/signserver/sign";
 import { Readable } from "stream";
 import { addWatermarkToPdf } from "./utils/watermark";
+import { fixPdfForSignServer } from "./utils/pdf-fix";
 import formidable from "formidable";
 
 const app = express();
@@ -15,7 +16,39 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date().toISOString() });
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    service: "GetSign Flow Service",
+    version: "1.0.0",
+  });
+});
+
+// SignServer health check endpoint
+app.get("/health/signserver", async (req, res) => {
+  try {
+    const { exec } = require("child_process");
+    const util = require("util");
+    const execAsync = util.promisify(exec);
+
+    const { stdout } = await execAsync(
+      "docker exec signserver /opt/keyfactor/signserver/bin/signserver getstatus complete 62823351"
+    );
+
+    res.json({
+      status: "OK",
+      timestamp: new Date().toISOString(),
+      service: "SignServer",
+      workerStatus: stdout,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "ERROR",
+      timestamp: new Date().toISOString(),
+      service: "SignServer",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
 });
 
 // PDF signing endpoint - handles FormData with formidable
@@ -89,6 +122,17 @@ app.post("/signserver/process", async (req, res) => {
           }
         }
 
+        // Step 2: Fix PDF metadata to prevent SignServer ClassCastException
+        try {
+          processedPdfBuffer = await fixPdfForSignServer(processedPdfBuffer);
+          console.log("PDF metadata fixed for SignServer compatibility");
+        } catch (fixError) {
+          console.warn(
+            "Could not fix PDF metadata, proceeding with original:",
+            fixError
+          );
+        }
+
         const fileStream = new Readable();
         fileStream.push(processedPdfBuffer);
         fileStream.push(null); // End the stream
@@ -132,20 +176,26 @@ app.use(
   }
 );
 
-app.listen(PORT, () => {
-  console.log(`🚀 Express server running on port ${PORT}`);
-  console.log(
-    `📄 PDF signing API (pure stream) available at http://localhost:${PORT}/api/sign-pdf-stream`
-  );
-  console.log(`🏥 Health check available at http://localhost:${PORT}/health`);
-});
-
-// Start the SQS polling in the background
-(async () => {
+// Initialize the application
+const initializeApp = async () => {
   try {
+    // Connect to database
     await connectDB(config.db);
-    await pollAndProcessJobs(HandleQueue);
+    console.log("✅ Database connected successfully");
+
+    // Start SQS polling
+    pollAndProcessJobs(HandleQueue);
+    console.log("✅ SQS polling started");
+
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
   } catch (error) {
-    console.log("SQS polling error:", error);
+    console.error("❌ Failed to initialize application:", error);
+    process.exit(1);
   }
-})();
+};
+
+// Initialize the app
+initializeApp();
