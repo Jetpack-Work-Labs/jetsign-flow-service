@@ -48,7 +48,7 @@ services:
 
     ports:
       - "8082:8080"
-      - "443:8443"
+      - "8445:8443"
   signserver:
     container_name: signserver
     image: keyfactor/signserver-ce:latest
