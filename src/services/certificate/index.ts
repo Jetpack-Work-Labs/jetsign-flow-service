@@ -35,7 +35,7 @@ export const createCertificate = ({
 
   cert.setSubject(attrs);
   cert.setIssuer(attrs);
-  cert.sign(keys.privateKey);
+  cert.sign(keys.privateKey, forge.md.sha256.create()); // added forge.md.sha256.create() here
 
   const password = generateRandomPassword();
   const p12Asn1 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, cert, password, {
