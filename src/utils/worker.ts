@@ -92,7 +92,6 @@ docker exec signserver sh -c "
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} AUTHTYPE "NOAUTH" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} CRYPTOTOKEN "${token_name}" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} DEFAULTKEY "${DEFAULTKEY}" && \
-/opt/keyfactor/signserver/bin/signserver setproperty ${workerId} LOCATION "Nepal" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} DIGESTALGORITHM "SHA256" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} WORKERCLASS "org.signserver.module.pdfsigner.PDFSigner" && \
 /opt/keyfactor/signserver/bin/signserver setproperty ${workerId} ADD_VISIBLE_SIGNATURE false && \
