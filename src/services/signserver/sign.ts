@@ -18,6 +18,7 @@ export async function signPDFStream({
   try {
     const form = new FormData();
 
+    console.log("Signing PDF with worker:", WORKER_NAME);
     form.append("workerName", WORKER_NAME);
     form.append("datafile", inputStream, {
       filename,
