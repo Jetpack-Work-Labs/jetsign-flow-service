@@ -25,4 +25,7 @@ export const config: IServerEnv = {
     encKey: LoadFromEnv("SOME_32BYTE_BASE64_STRING"),
     sigKey: LoadFromEnv("SOME_64BYTE_BASE64_STRING"),
   },
+  sentry: {
+    dns: LoadFromEnv("SENTRY_DSN"),
+  },
 };

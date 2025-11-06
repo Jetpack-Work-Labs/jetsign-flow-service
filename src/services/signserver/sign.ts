@@ -3,6 +3,7 @@ import FormData from "form-data";
 import https from "https";
 import { Readable } from "stream";
 import { SIGN_SERVER_URL } from "../../const";
+import { Sentry } from "../../infrastructure";
 
 export async function signPDFStream({
   inputStream,
@@ -42,6 +43,23 @@ export async function signPDFStream({
     } else {
       console.error("❌ Unknown error signing PDF stream");
     }
+    
+    // Capture error in Sentry with context
+    Sentry.captureException(err, {
+      tags: {
+        service: "signserver",
+        operation: "sign_pdf_stream",
+        worker: WORKER_NAME,
+      },
+      contexts: {
+        signserver: {
+          url: SIGN_SERVER_URL,
+          worker: WORKER_NAME,
+          filename,
+        },
+      },
+    });
+    
     throw err;
   }
 }

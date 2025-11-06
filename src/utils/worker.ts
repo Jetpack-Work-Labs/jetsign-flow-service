@@ -1,4 +1,5 @@
 import { runDockerCommand } from "./docker";
+import { Sentry } from "../infrastructure";
 
 // Check if a worker exists using CLI
 export async function checkWorkerExists({ worker }: { worker: string }) {
@@ -15,6 +16,13 @@ export async function checkWorkerExists({ worker }: { worker: string }) {
     }
     return { exists: true };
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "check_worker_exists",
+        worker,
+      },
+    });
     return { exists: false };
   }
 }
@@ -29,6 +37,12 @@ export async function activateAll() {
     }
     return { exists: true };
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "activate_all",
+      },
+    });
     return { exists: false };
   }
 }
@@ -68,6 +82,20 @@ export async function CreateCryptoToken({
     console.log({ output });
     return true;
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "create_crypto_token_worker",
+        workerId: String(workerId),
+      },
+      contexts: {
+        signserver: {
+          workerId,
+          tokenName: token_name,
+          keystorePath: KEYSTOREPATH,
+        },
+      },
+    });
     return true;
   }
 }
@@ -104,6 +132,20 @@ docker exec signserver sh -c "
     console.log({ output });
     return true;
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "create_pdf_worker",
+        workerId: String(workerId),
+      },
+      contexts: {
+        signserver: {
+          workerId,
+          tokenName: token_name,
+          defaultKey: DEFAULTKEY,
+        },
+      },
+    });
     return true;
   }
 }

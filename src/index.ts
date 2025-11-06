@@ -1,15 +1,20 @@
 import express from "express";
 import { HandleQueue, pollAndProcessJobs } from "./services/sqs";
 import { config } from "./config";
-import { connectDB } from "./infrastructure";
+import { connectDB, initializeSentry, Sentry } from "./infrastructure";
 import { signPDFStream } from "./services/signserver/sign";
 import { Readable } from "stream";
 import { addWatermarkToPdf } from "./utils/watermark";
 import { fixPdfForSignServer } from "./utils/pdf-fix";
 import formidable from "formidable";
 
+// Initialize Sentry before anything else
+initializeSentry();
+
 const app = express();
 const PORT = 9999;
+
+// No additional middleware needed - Sentry auto-instruments Express
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,6 +47,17 @@ app.get("/health/signserver", async (req, res) => {
       workerStatus: stdout,
     });
   } catch (error) {
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "health_check",
+      },
+      contexts: {
+        signserver: {
+          endpoint: "/health/signserver",
+        },
+      },
+    });
     res.status(500).json({
       status: "ERROR",
       timestamp: new Date().toISOString(),
@@ -63,6 +79,12 @@ app.post("/signserver/process", async (req, res) => {
     form.parse(req, async (err, fields, files) => {
       if (err) {
         console.error("Error parsing FormData:", err);
+        Sentry.captureException(err, {
+          tags: {
+            service: "signserver",
+            operation: "parse_formdata",
+          },
+        });
         res
           .status(400)
           .json({ error: "Error parsing FormData", details: err.message });
@@ -112,6 +134,18 @@ app.post("/signserver/process", async (req, res) => {
             processedPdfBuffer = await addWatermarkToPdf(processedPdfBuffer);
             console.log("watermark added ");
           } catch (watermarkError) {
+            Sentry.captureException(watermarkError, {
+              tags: {
+                service: "signserver",
+                operation: "add_watermark",
+              },
+              contexts: {
+                file: {
+                  filename: filePart.originalFilename,
+                  workerName,
+                },
+              },
+            });
             if ((filePart as any).buffer) {
               processedPdfBuffer = (filePart as any).buffer;
             } else if (filePart.filepath) {
@@ -131,6 +165,19 @@ app.post("/signserver/process", async (req, res) => {
             "Could not fix PDF metadata, proceeding with original:",
             fixError
           );
+          Sentry.captureException(fixError, {
+            tags: {
+              service: "signserver",
+              operation: "fix_pdf_metadata",
+            },
+            level: "warning",
+            contexts: {
+              file: {
+                filename: filePart.originalFilename,
+                workerName,
+              },
+            },
+          });
         }
 
         const fileStream = new Readable();
@@ -146,6 +193,12 @@ app.post("/signserver/process", async (req, res) => {
         });
       } catch (parseError) {
         console.error("Error processing request:", parseError);
+        Sentry.captureException(parseError, {
+          tags: {
+            service: "signserver",
+            operation: "process_request",
+          },
+        });
         res.status(400).json({
           error: "Error processing request",
           details:
@@ -157,12 +210,20 @@ app.post("/signserver/process", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in sign-pdf endpoint:", error);
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "sign_pdf",
+      },
+    });
     res.status(500).json({
       error: "Failed to sign PDF",
       details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
+
+// Sentry error handler is already set up via setupExpressErrorHandler
 
 app.use(
   (

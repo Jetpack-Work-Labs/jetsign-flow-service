@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { runDockerCommand, sleep } from "../../utils";
+import { Sentry } from "../../infrastructure";
 
 export const createCryptoToken = async ({
   PATH,
@@ -11,9 +12,10 @@ export const createCryptoToken = async ({
 }) => {
   console.log({ PATH });
 
-  await runDockerCommand(
-    `docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver deactivatecryptotoken 1"`
-  );
+  try {
+    await runDockerCommand(
+      `docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver deactivatecryptotoken 1"`
+    );
   await runDockerCommand(
     `docker exec signserver sh -c "/opt/keyfactor/signserver/bin/signserver removeworker 2"`
   );
@@ -54,7 +56,22 @@ export const createCryptoToken = async ({
   await sleep(5000); // sleep for 2 seconds
 
   // 4. (Optional) Reload the signer again to reflect the certificate
-  await runDockerCommand(
-    `docker exec signserver /opt/keyfactor/signserver/bin/signserver reload 2`
-  );
+    await runDockerCommand(
+      `docker exec signserver /opt/keyfactor/signserver/bin/signserver reload 2`
+    );
+  } catch (error) {
+    console.error("❌ Error creating crypto token:", error);
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "create_crypto_token",
+      },
+      contexts: {
+        signserver: {
+          keystore_path: PATH,
+        },
+      },
+    });
+    throw error;
+  }
 };
