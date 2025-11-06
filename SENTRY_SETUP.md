@@ -20,7 +20,7 @@ Add the following environment variables to your `.env` file:
 
 ```bash
 SENTRY_DSN=your-sentry-dsn-here
-NODE_ENV=production  # or development
+ENVIRONMENT=production  # or development
 ```
 
 ### 2. Get Your Sentry DSN
@@ -43,10 +43,12 @@ All SignServer errors are automatically captured with:
 ### Error Categories
 
 #### 1. SignServer Health Check Errors
+
 - **Operation**: `health_check`
 - **Context**: Endpoint information
 
 #### 2. PDF Signing Errors
+
 - **Operations**:
   - `parse_formdata`: FormData parsing errors
   - `add_watermark`: Watermark addition errors (warning level)
@@ -56,10 +58,12 @@ All SignServer errors are automatically captured with:
   - `sign_pdf_stream`: SignServer stream signing errors
 
 #### 3. Docker Command Errors
+
 - **Operation**: `docker_command`
 - **Context**: Full command string that failed
 
 #### 4. Worker Management Errors
+
 - **Operations**:
   - `check_worker_exists`: Worker existence check failures
   - `activate_all`: Worker activation errors
@@ -70,6 +74,7 @@ All SignServer errors are automatically captured with:
 ### Performance Monitoring
 
 The integration includes:
+
 - Request tracing for all HTTP requests
 - Performance profiling
 - 100% trace sampling (configurable in production)
@@ -91,6 +96,7 @@ The integration includes:
 Each error includes:
 
 **Tags** (for filtering):
+
 ```javascript
 {
   service: "signserver",
@@ -100,6 +106,7 @@ Each error includes:
 ```
 
 **Context** (for debugging):
+
 ```javascript
 {
   signserver: {
@@ -126,8 +133,8 @@ In `src/infrastructure/sentry.ts`, you can adjust:
 ```typescript
 Sentry.init({
   dsn,
-  environment: process.env.NODE_ENV || "development",
-  tracesSampleRate: 1.0,  // 100% of transactions (change to 0.1 for 10%)
+  environment: process.env.ENVIRONMENT || "development",
+  tracesSampleRate: 1.0, // 100% of transactions (change to 0.1 for 10%)
   profilesSampleRate: 1.0, // 100% profiling
 });
 ```
@@ -149,9 +156,9 @@ try {
     },
     contexts: {
       custom: {
-        key: "value"
-      }
-    }
+        key: "value",
+      },
+    },
   });
   throw error;
 }
@@ -162,6 +169,7 @@ try {
 ### Sentry Not Initializing
 
 If you see the warning: `⚠️ SENTRY_DSN not configured`, ensure:
+
 1. Your `.env` file contains `SENTRY_DSN`
 2. The DSN value is correct
 3. The application has been restarted after adding the DSN

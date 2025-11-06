@@ -13,4 +13,7 @@ export interface IServerEnv {
     encKey: string | undefined;
     sigKey: string | undefined;
   };
+  sentry: {
+    dns: string;
+  };
 }
