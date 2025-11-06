@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import { execSync } from "child_process"; // Use execSync for simplicity
+import { Sentry } from "../infrastructure";
 export function runDockerCommand(command: string) {
   try {
     // const output = exec(command, { encoding: "utf8" });
@@ -8,6 +9,17 @@ export function runDockerCommand(command: string) {
     return output;
   } catch (error) {
     console.error(`Error executing Docker command: ${error}`);
+    Sentry.captureException(error, {
+      tags: {
+        service: "signserver",
+        operation: "docker_command",
+      },
+      contexts: {
+        docker: {
+          command,
+        },
+      },
+    });
     throw error;
   }
 }
