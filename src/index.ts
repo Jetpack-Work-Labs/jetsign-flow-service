@@ -46,7 +46,6 @@ app.get("/health/signserver", async (req, res) => {
       service: "SignServer",
       workerStatus: stdout,
     });
-    throw new Error("Test Sentry error capture");
   } catch (error) {
     Sentry.captureException(error, {
       tags: {
