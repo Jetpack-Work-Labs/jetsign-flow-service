@@ -96,6 +96,7 @@ app.post("/signserver/process", async (req, res) => {
         const workerName = fields.workerName?.[0];
         const watermark = fields.watermark?.[0];
 
+        console.log({ workerName });
         if (!filePart) {
           res.status(400).json({
             error:
