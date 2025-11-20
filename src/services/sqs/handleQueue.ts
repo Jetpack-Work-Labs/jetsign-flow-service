@@ -15,6 +15,7 @@ import { CRYPTO_TOKEN, PDF_SIGNER } from "../../const";
 export const HandleQueue = async (job: SignJob): Promise<void> => {
   const applicationService = new ApplicationService();
   const certificateService = new CertificateService();
+  console.log({ job });
   const { accountId } = job;
   const company = await applicationService.findCompany(accountId);
   if (company) {
@@ -77,6 +78,11 @@ export const HandleQueue = async (job: SignJob): Promise<void> => {
       });
     }
 
+    console.log({
+      accountId,
+      workerId: String(accountId) + "1",
+      tokenId: String(accountId) + "0",
+    });
     await certificateService.updateCertificates({
       accountId,
       workerId: String(accountId) + "1",
