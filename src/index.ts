@@ -27,6 +27,7 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
     service: "GetSign Flow Service",
     version: "1.0.0",
+    payloadSize: REQUEST_BODY_LIMIT,
   });
 });
 
@@ -38,7 +39,7 @@ app.get("/health/signserver", async (req, res) => {
     const execAsync = util.promisify(exec);
 
     const { stdout } = await execAsync(
-      "docker exec signserver /opt/keyfactor/signserver/bin/signserver getstatus complete 62823351"
+      "docker exec signserver /opt/keyfactor/signserver/bin/signserver getstatus complete 62823351",
     );
 
     res.json({
@@ -116,7 +117,7 @@ app.post("/signserver/process", async (req, res) => {
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
           "Content-Disposition",
-          'attachment; filename="signed-document.pdf"'
+          'attachment; filename="signed-document.pdf"',
         );
 
         // Step 1: Add watermark if requested
@@ -152,7 +153,7 @@ app.post("/signserver/process", async (req, res) => {
               processedPdfBuffer = (filePart as any).buffer;
             } else if (filePart.filepath) {
               processedPdfBuffer = require("fs").readFileSync(
-                filePart.filepath
+                filePart.filepath,
               );
             }
           }
@@ -165,7 +166,7 @@ app.post("/signserver/process", async (req, res) => {
         } catch (fixError) {
           console.warn(
             "Could not fix PDF metadata, proceeding with original:",
-            fixError
+            fixError,
           );
           Sentry.captureException(fixError, {
             tags: {
@@ -232,11 +233,11 @@ app.use(
     error: any,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    next: express.NextFunction,
   ) => {
     console.error("Express error:", error);
     res.status(500).json({ error: "Internal server error" });
-  }
+  },
 );
 
 // Initialize the application
