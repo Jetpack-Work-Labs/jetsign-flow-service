@@ -1,4 +1,5 @@
 import express from "express";
+import morgan from "morgan";
 import { HandleQueue, pollAndProcessJobs } from "./services/sqs";
 import { config } from "./config";
 import { connectDB, initializeSentry, Sentry } from "./infrastructure";
@@ -17,6 +18,7 @@ const REQUEST_BODY_LIMIT = "50mb";
 
 // No additional middleware needed - Sentry auto-instruments Express
 
+app.use(morgan("combined"));
 app.use(express.json({ limit: REQUEST_BODY_LIMIT }));
 app.use(express.urlencoded({ extended: true, limit: REQUEST_BODY_LIMIT }));
 
