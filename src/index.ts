@@ -26,7 +26,7 @@ app.get("/health", (req, res) => {
     status: "OK",
     timestamp: new Date().toISOString(),
     service: "GetSign Flow Service",
-    version: "1.0.0",
+    version: "2.0.0",
     payloadSize: REQUEST_BODY_LIMIT,
   });
 });
