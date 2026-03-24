@@ -13,11 +13,12 @@ initializeSentry();
 
 const app = express();
 const PORT = 9999;
+const REQUEST_BODY_LIMIT = "50mb";
 
 // No additional middleware needed - Sentry auto-instruments Express
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: REQUEST_BODY_LIMIT }));
+app.use(express.urlencoded({ extended: true, limit: REQUEST_BODY_LIMIT }));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
