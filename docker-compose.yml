@@ -8,6 +8,7 @@ services:
   ejbca-database:
     container_name: ejbca-database
     image: "mariadb:latest"
+    restart: always
     networks:
       - application-bridge
     environment:
@@ -20,6 +21,7 @@ services:
   signserver-database:
     container_name: signserver-database
     image: "mariadb:latest"
+    restart: always
     networks:
       - application-bridge
     environment:
@@ -34,6 +36,7 @@ services:
     hostname: ejbca-node1
     container_name: ejbca
     image: keyfactor/ejbca-ce:latest
+    restart: always
     depends_on:
       - ejbca-database
     networks:
@@ -52,6 +55,7 @@ services:
   signserver:
     container_name: signserver
     image: keyfactor/signserver-ce:latest
+    restart: always
     depends_on:
       - signserver-database
     networks:
