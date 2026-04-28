@@ -16,34 +16,24 @@ export async function addWatermarkToPdf(pdfBuffer: Buffer): Promise<Buffer> {
   const x = pageWidth - watermarkWidth - margin; // Right side
   const y = margin; // Bottom area
 
-  // Get watermark image path
-  const watermarkImagePath = path.join(
+  const watermarkImagePath = path.resolve(
     __dirname,
-    "../public/watermark/watermark.png"
+    "../../public/watermark/watermark.png"
   );
-  console.log(watermarkImagePath);
-  // Add watermark image if provided
-  if (watermarkImagePath && fs.existsSync(watermarkImagePath)) {
-    try {
-      const watermarkImageBytes = fs.readFileSync(watermarkImagePath);
-      const watermarkImage = await pdfDoc.embedPng(watermarkImageBytes);
-      console.log({
-        watermarkImageBytes,
-        watermarkImage,
-      });
-      lastPage.drawImage(watermarkImage, {
-        x,
-        y,
-        width: watermarkWidth,
-        height: watermarkHeight,
-      });
-    } catch (error) {
-      console.warn(
-        "Could not embed watermark image, using text instead:",
-        error
-      );
-    }
+
+  if (!fs.existsSync(watermarkImagePath)) {
+    console.error(`Watermark image not found at: ${watermarkImagePath}`);
+    throw new Error(`Watermark image not found at: ${watermarkImagePath}`);
   }
+
+  const watermarkImageBytes = fs.readFileSync(watermarkImagePath);
+  const watermarkImage = await pdfDoc.embedPng(watermarkImageBytes);
+  lastPage.drawImage(watermarkImage, {
+    x,
+    y,
+    width: watermarkWidth,
+    height: watermarkHeight,
+  });
 
   // Add clickable link annotation
   const linkAnnot = pdfDoc.context.obj({

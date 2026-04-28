@@ -122,10 +122,8 @@ app.post("/signserver/process", async (req, res) => {
           'attachment; filename="signed-document.pdf"',
         );
 
-        // Step 1: Add watermark if requested
         let processedPdfBuffer: Buffer;
 
-        // Try to get the buffer from the stream first, then fallback to filepath
         if ((filePart as any).buffer) {
           processedPdfBuffer = (filePart as any).buffer;
         } else if (filePart.filepath) {
@@ -133,38 +131,10 @@ app.post("/signserver/process", async (req, res) => {
         } else {
           throw new Error("No file data found");
         }
-        console.log(shouldAddWatermark);
-        if (shouldAddWatermark) {
-          try {
-            processedPdfBuffer = await addWatermarkToPdf(processedPdfBuffer);
-            console.log("watermark added ");
-          } catch (watermarkError) {
-            Sentry.captureException(watermarkError, {
-              tags: {
-                service: "signserver",
-                operation: "add_watermark",
-              },
-              contexts: {
-                file: {
-                  filename: filePart.originalFilename,
-                  workerName,
-                },
-              },
-            });
-            if ((filePart as any).buffer) {
-              processedPdfBuffer = (filePart as any).buffer;
-            } else if (filePart.filepath) {
-              processedPdfBuffer = require("fs").readFileSync(
-                filePart.filepath,
-              );
-            }
-          }
-        }
 
-        // Step 2: Fix PDF metadata to prevent SignServer ClassCastException
+        // Step 1: Fix PDF metadata first (creates a new doc via copyPages, which strips annotations)
         try {
           processedPdfBuffer = await fixPdfForSignServer(processedPdfBuffer);
-          console.log("PDF metadata fixed for SignServer compatibility");
         } catch (fixError) {
           console.warn(
             "Could not fix PDF metadata, proceeding with original:",
@@ -183,6 +153,11 @@ app.post("/signserver/process", async (req, res) => {
               },
             },
           });
+        }
+
+        // Step 2: Add watermark after metadata fix so the image and annotations survive
+        if (shouldAddWatermark) {
+          processedPdfBuffer = await addWatermarkToPdf(processedPdfBuffer);
         }
 
         const fileStream = new Readable();
